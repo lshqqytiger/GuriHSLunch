@@ -1,0 +1,23 @@
+block Middle
+	head
+		title LUNCH
+		script(type='text/javascript', src='/js/jquery.js')
+		script(type='text/javascript', src='/js/in_lunch.min.js')
+		
+		span#date
+		img#loading(src='/cdn/lunch_loading.gif')
+		span#lunchList
+		p
+		select#month-select(onchange='rebuildURL($("#month-select").val(), $("#day-select").val()), getLunch()')
+			- var temporary = new Date();
+			- for(var i = 1; i <= 12; i++){
+				div(style='float: left; width: 100%;')
+					option(value=i, style='color: black')= i
+			- };
+		label 월
+		select#day-select(onchange='rebuildURL($("#month-select").val(), $("#day-select").val()), getLunch()')
+			- for(var n = 1; n <= 31; n++){
+				div(style='float: left; width: 100%;')
+					option(value=n, style='color: black')= n
+			- };
+		label 일
