@@ -61,6 +61,3 @@ buck-out/
 
 # Lagacy Build
 /.lagacy/App/build
-
-# 
-/android/tools
