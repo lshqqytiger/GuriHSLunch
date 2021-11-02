@@ -1,3 +1,3 @@
 cd..
-gradlew build -Dorg.gradle.java.home="C:\Program Files\Android\Android Studio\jre"
+gradlew build -Dorg.gradle.java.home="D:\Android\Android Studio\jre"
 pause
