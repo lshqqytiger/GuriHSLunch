@@ -6,7 +6,7 @@
  * @flow strict-local
  */
 
-import React from 'react';
+import React, {useCallback, useState, useEffect} from 'react';
 import type {Node} from 'react';
 import {
   SafeAreaView,
@@ -16,7 +16,11 @@ import {
   Text,
   useColorScheme,
   View,
+  Center,
 } from 'react-native';
+import Axios from 'axios';
+import {RNHP} from 'react-native-html-parser';
+import RNPickerSelect from 'react-native-picker-select';
 
 import {
   Colors,
@@ -26,38 +30,51 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
-const Section = ({children, title}): Node => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-};
+const DOMParser = new RNHP.DOMParser();
+const styles = StyleSheet.create({
+  highlight: {
+    fontWeight: '700',
+  },
+});
+const today = new Date();
+const ATPT_OFCDC_SC_CODE = 'J10';
+const SD_SCHUL_CODE = '7530054';
 
 const App: () => Node = () => {
   const isDarkMode = useColorScheme() === 'dark';
+  const [date, _setDate] = useState(new Date());
+  const [lunch, setLunch] = useState('');
+  const [over, setOver] = useState(false);
+  const parseDate = useCallback(() => {
+    return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(
+      2,
+      '0',
+    )}${String(date.getDate()).padStart(2, '0')}`;
+  }, [date]);
+  const setDate = useCallback(
+    (month, date) => {
+      _setDate(new Date(date.getFullYear(), month, date));
+    },
+    [date],
+  );
+  const getWeek = useCallback(() => {
+    const weekList = ['일', '월', '화', '수', '목', '금', '토'];
+    return weekList[date.getDay()];
+  }, [date]);
 
   const backgroundStyle = {
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
+
+  useEffect(() => {
+    const fetch = async () => {
+      const {data} = await Axios.get(
+        `https://open.neis.go.kr/hub/mealServiceDietInfo?Type=json&SD_SCHUL_CODE=${SD_SCHUL_CODE}&ATPT_OFCDC_SC_CODE=${ATPT_OFCDC_SC_CODE}&MLSV_YMD=${parseDate()}`,
+      );
+      setLunch(data.mealServiceDietInfo[1].row[0].DDISH_NM);
+    };
+    fetch();
+  }, [date]);
 
   return (
     <SafeAreaView style={backgroundStyle}>
@@ -70,30 +87,39 @@ const App: () => Node = () => {
           style={{
             backgroundColor: isDarkMode ? Colors.black : Colors.white,
           }}>
-          <Text>Test</Text>
+          <Center>
+            <Text>
+              {date.getFullYear()}년 {date.getMonth()}월 {date.getDate()}일{' '}
+              {getWeek()}요일 {date == today && '(오늘)'}
+            </Text>
+            <Text>{DOMParser.parseFromString(lunch, 'text/html')}</Text>
+            <RNPickerSelect
+              onValueChange={value => {
+                setDate(value, date.getDate());
+              }}
+              items={[
+                Array(12).map((empty, i) => {
+                  return {label: Number(i) + 1, value: i};
+                }),
+              ]}
+            />
+            월
+            <RNPickerSelect
+              onValueChange={value => {
+                setDate(date.getMonth(), value);
+              }}
+              items={[
+                Array(31).map((empty, i) => {
+                  return {label: Number(i) + 1, value: Number(i) + 1};
+                }),
+              ]}
+            />
+            일
+          </Center>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
 
 export default App;
