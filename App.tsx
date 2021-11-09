@@ -43,22 +43,30 @@ export default function App() {
 
   return (
     <View style={styles.container}>
-      <Text>
-        {date.getFullYear()}년 {date.getMonth() + 1}월 {date.getDate()}일{" "}
-        {getWeek()}요일{" "}
-        {date.toDateString() == today.toDateString() && "(오늘)"}
-      </Text>
-      <WebView
-        originWhitelist={["*"]}
-        source={{ html: noLunch ? "" : lunch }}
-      />
-      {noLunch && (
+      <View style={styles.singleContainer}>
         <Text>
-          급식이 없는 날이거나 나이스 OpenAPI를 제공하지 않는 학교입니다.
+          {date.getFullYear()}년 {date.getMonth() + 1}월 {date.getDate()}일{" "}
+          {getWeek()}요일{" "}
+          {date.toDateString() == today.toDateString() && "(오늘)"}
         </Text>
-      )}
-      <View>
+      </View>
+      <View style={styles.singleContainer}>
+        <WebView
+          style={styles.lunch}
+          originWhitelist={["*"]}
+          source={{ html: noLunch ? "" : lunch }}
+        />
+      </View>
+      <View style={styles.singleContainer}>
+        {noLunch && (
+          <Text>
+            급식이 없는 날이거나 나이스 OpenAPI를 제공하지 않는 학교입니다.
+          </Text>
+        )}
+      </View>
+      <View style={styles.selectBoxContainer}>
         <Picker
+          style={styles.selectBox}
           selectedValue={date.getMonth()}
           onValueChange={(value) => {
             setDate(new Date(date.getFullYear(), value, date.getDate()));
@@ -70,6 +78,7 @@ export default function App() {
         </Picker>
         <Text>월</Text>
         <Picker
+          style={styles.selectBox}
           selectedValue={date.getDate()}
           onValueChange={(value) => {
             setDate(new Date(date.getFullYear(), date.getMonth(), value));
@@ -81,31 +90,33 @@ export default function App() {
         </Picker>
         <Text>일</Text>
       </View>
-      {over && (
-        <>
-          <Text>
-            오늘 점심 시간은 지났습니다. 내일 급식을 확인하시겠습니까?
-          </Text>
-          <Button
-            title="내일 급식 보기"
-            onPress={() => {
-              setDate(
-                new Date(
-                  date.getFullYear(),
-                  date.getMonth(),
-                  date.getDate() + 1
-                )
-              );
-            }}
-          />
-          <Button
-            title="무시"
-            onPress={() => {
-              setOver(false);
-            }}
-          />
-        </>
-      )}
+      <View style={styles.singleContainer}>
+        {over && (
+          <>
+            <Text>
+              오늘 점심 시간은 지났습니다. 내일 급식을 확인하시겠습니까?
+            </Text>
+            <Button
+              title="내일 급식 보기"
+              onPress={() => {
+                setDate(
+                  new Date(
+                    date.getFullYear(),
+                    date.getMonth(),
+                    date.getDate() + 1
+                  )
+                );
+              }}
+            />
+            <Button
+              title="무시"
+              onPress={() => {
+                setOver(false);
+              }}
+            />
+          </>
+        )}
+      </View>
     </View>
   );
 }
@@ -116,5 +127,21 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+    height: "70%",
+  },
+  singleContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  selectBoxContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  selectBox: {
+    width: "100%",
+  },
+  lunch: {
+    width: "100%",
+    height: "100%",
   },
 });
