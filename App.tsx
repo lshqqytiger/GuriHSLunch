@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { StyleSheet, Text, View, Button } from "react-native";
-import { WebView } from "react-native-webview";
-import { Picker } from "@react-native-picker/picker";
+import DatePicker from "react-native-modal-datetime-picker";
 
 import Axios from "axios";
 
@@ -15,11 +14,21 @@ const parseDate = (date: Date) => {
   )}${String(date.getDate()).padStart(2, "0")}`;
 };
 
+const LunchBox = ({ html }: any) => {
+  const arr = [];
+  const htmlArr = html.split("<br/>");
+  for (let i in htmlArr) {
+    arr.push(<Text>{htmlArr[i]}</Text>);
+  }
+  return <>{arr.map((opt) => opt)}</>;
+};
+
 export default function App() {
   const [date, setDate] = useState(new Date());
   const [lunch, setLunch] = useState("");
   const [noLunch, setNoLunch] = useState(false);
   const [over, setOver] = useState(false);
+  const [isDatePickerVisible, setDatePickerVisiblity] = useState(false);
   const getWeek = useCallback(() => {
     const weekList = ["일", "월", "화", "수", "목", "금", "토"];
     return weekList[date.getDay()];
@@ -50,12 +59,9 @@ export default function App() {
           {date.toDateString() == today.toDateString() && "(오늘)"}
         </Text>
       </View>
+      <Text>{"\n"}</Text>
       <View style={styles.singleContainer}>
-        <WebView
-          style={styles.lunch}
-          originWhitelist={["*"]}
-          source={{ html: noLunch ? "" : lunch }}
-        />
+        {!noLunch && <LunchBox html={lunch} />}
       </View>
       <View style={styles.singleContainer}>
         {noLunch && (
@@ -65,31 +71,25 @@ export default function App() {
         )}
       </View>
       <View style={styles.selectBoxContainer}>
-        <Picker
-          style={styles.selectBox}
-          selectedValue={date.getMonth()}
-          onValueChange={(value) => {
-            setDate(new Date(date.getFullYear(), value, date.getDate()));
+        <Button
+          title="날짜 변경"
+          onPress={() => {
+            setDatePickerVisiblity(true);
           }}
-        >
-          {[...Array(12)].map((_, i) => {
-            return <Picker.Item label={String(i + 1)} value={i} />;
-          })}
-        </Picker>
-        <Text>월</Text>
-        <Picker
-          style={styles.selectBox}
-          selectedValue={date.getDate()}
-          onValueChange={(value) => {
-            setDate(new Date(date.getFullYear(), date.getMonth(), value));
+        />
+        <DatePicker
+          isVisible={isDatePickerVisible}
+          mode="date"
+          onConfirm={(selectedDate) => {
+            setDate(selectedDate);
+            setDatePickerVisiblity(false);
           }}
-        >
-          {[...Array(31)].map((_, i) => {
-            return <Picker.Item label={String(i + 1)} value={i + 1} />;
-          })}
-        </Picker>
-        <Text>일</Text>
+          onCancel={() => {
+            setDatePickerVisiblity(false);
+          }}
+        />
       </View>
+      <Text>{"\n"}</Text>
       <View style={styles.singleContainer}>
         {over && (
           <>
@@ -117,6 +117,9 @@ export default function App() {
           </>
         )}
       </View>
+      <View style={styles.footer}>
+        <Text>Copyright (c) 2021 이승훈</Text>
+      </View>
     </View>
   );
 }
@@ -140,8 +143,9 @@ const styles = StyleSheet.create({
   selectBox: {
     width: "100%",
   },
-  lunch: {
-    width: "100%",
-    height: "100%",
+  footer: {
+    alignItems: "center",
+    justifyContent: "center",
+    height: 200,
   },
 });
