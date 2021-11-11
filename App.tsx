@@ -91,7 +91,7 @@ export default function App() {
       </View>
       <Text>{"\n"}</Text>
       <View style={styles.singleContainer}>
-        {over && (
+        {over && date.toDateString() == today.toDateString() && (
           <>
             <Text>
               오늘 점심 시간은 지났습니다. 내일 급식을 확인하시겠습니까?
